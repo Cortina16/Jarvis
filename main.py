@@ -206,7 +206,7 @@ def askgemini(question):
 #----------TTS SYSTEM---------#
 def tts_func(text: str):
     elevenlabs = ElevenLabs(
-      api_key=os.getenv("ELEVEN_LABS_KEY"),
+      api_key=os.getenv("ELEVEN_LABS_KEY_2"),
     )
     audio = elevenlabs.text_to_speech.convert(
         text=text,
