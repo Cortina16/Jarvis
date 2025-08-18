@@ -75,11 +75,11 @@ def _authenticate_spotify():
         "user-library-read user-library-modify user-read-email user-read-private"
     )
     auth_manager = SpotifyOAuth(
-        client_id="13d6abc247f5427599cf6e02af93cb9b",
+        client_id=os.getenv("SPOTIPY_CLIENT_ID"),
         client_secret=os.getenv("SPOTIPY_CLIENT_SECRET"),
         redirect_uri="http://127.0.0.1:8888/callback",
         scope=scope,
-        username="Nightreaper127"
+        username=os.getenv("SPOTIFY_USERNAME"),
     )
     return spotipy.Spotify(auth_manager=auth_manager)
 
