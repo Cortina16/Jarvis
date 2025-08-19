@@ -1,14 +1,11 @@
-import os
-
 from elevenlabs import play
 from google import genai
 from dotenv import load_dotenv
 from google.genai import types
-from gtts import gTTS
 from elevenlabs.client import ElevenLabs
 import speech_recognition as sr
 import tools
-import wave
+import os
 load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
@@ -117,13 +114,86 @@ start_timer = types.Tool(
     ]
 )
 
+search_files = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="search_files",
+            description="Search the current computer for any requested files that may exist",
+            parameters_json_schema={
+                'type' : 'object',
+                'properties' : {
+                    'query': {
+                        'type' : 'string',
+                        'description' : 'The files/folder to search the computer for',
+                    },
+                    'result_amount': {
+                        'type': 'number',
+                        'description': "how many files to show up in the returned results",
+                    }
+                },
+                'required' : ['query'],
+            }
+        )
+    ]
+)
+
+run_program = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="run_program",
+            description="Search the current computer for any program that may exist and is desired to run",
+            parameters_json_schema={
+                'type' : 'object',
+                'properties' : {
+                    'query': {
+                        'type' : 'string',
+                        'description' : 'the program to attempt to run.',
+                    },
+                },
+                'required' : ['query'],
+            }
+        )
+    ]
+)
+
+open_tab = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="open_tab",
+            description="open a tab to the desired url in a web browser",
+            parameters_json_schema={
+                'type' : 'object',
+                'properties' : {
+                    'url': {
+                        'type' : 'string',
+                        'description' : 'the web url to open a tab to.',
+                    },
+                    'web_browser': {
+                        'type' : 'string',
+                        'description' : 'the web browser to use to open the tab. default option is: firefox regular, which is firefox non private browsing. the second option is: firefox incognito, which is firefox private browsing. the third option is chrome, which is normal google chrome. ',
+                    },
+                },
+                'required' : ['url'],
+            }
+        )
+    ]
+)
+
+
+
+
 functionMap = {
     "get_time": tools.getTime,
     "web_search": tools.web_search,
     "get_weather": tools.get_weather,
     "main_controller_spotify": tools.main_controller_spotify,
     "start_timer": tools.start_timer,
+    "search_files": tools.search_files,
+    "run_program": tools.run_program,
+    "open_tab" : tools.open_tabs,
 }
+tools_list = [get_time, web_search, get_weather, main_controller_spotify, start_timer, search_files, run_program, open_tab]
+print(list(functionMap.keys()))
 def askgemini(question):
     """
     Sends a question to the Gemini api and stores history
@@ -134,9 +204,9 @@ def askgemini(question):
         model="gemini-2.5-flash",
         contents=conversationHistory,
         config=types.GenerateContentConfig(
-            system_instruction="You are an AI assistant named Jargis like the Jargis from Iron Man. Address user as 'Sir' when needed. Don't be robotic. Keep your responses short, preferably under 20 words. The date and time after each query is information. Subtly mention it like 'Good evening' or 'You're up late'",
+            system_instruction="You are an AI assistant named Jarvis like the Jarvis from Iron Man. Address user as 'Sir' when needed. Don't be robotic. Keep your responses short, preferably under 20 words. The date and time after each query is information. Subtly mention it like 'Good evening' or 'You're up late'",
             temperature=0.5,
-            tools=[get_time, web_search, get_weather, main_controller_spotify, start_timer],
+            tools=tools_list,
         )
     )
     function_handled = False
@@ -186,9 +256,9 @@ def askgemini(question):
             model="gemini-2.5-flash",
             contents=contents_for_second_call,
             config=types.GenerateContentConfig(
-                system_instruction="You are an AI assistant named Jargis like the Jargis from Iron Man. Address user as 'Sir' when needed. Don't be robotic. Keep your responses short, preferably under 20 words. The date and time after each query is information. Subtly mention it like 'Good evening' or 'You're up late'",
+                system_instruction="You are an AI assistant named Jarvis like the Jarvis from Iron Man. Address user as 'Sir' when needed. Don't be robotic. Keep your responses short, preferably under 20 words. The date and time after each query is information. Subtly mention it like 'Good evening' or 'You're up late'",
                 temperature=0.5,
-                tools=[get_time, web_search, get_weather, main_controller_spotify, start_timer],
+                tools=tools_list,
             )
         )
 
@@ -216,67 +286,23 @@ def tts_func(text: str):
     )
     return audio
 
+def main():
+    while True:
+        try:
+            r = sr.Recognizer()
+            with sr.Microphone() as source:
+                audio = r.recognize_google(r.listen(source))
+            print(f"You: {audio}")
+            output = askgemini(audio)
+            print(f"Jarvis: {output}")
+            play(tts_func(output))
+        except sr.UnknownValueError:
+            print("Could not understand audio")
+        except sr.RequestError as e:
+            print(f"Could not request results from Google Earth API; {0}".format(e))
+        except Exception as e:
+            print(f"Unexpected error: {e}")
 
-while True:
-    try:
-        r = sr.Recognizer()
-        with sr.Microphone() as source:
-            audio = r.recognize_google(r.listen(source))
-        # uInput = input("You: ")
-        # if uInput.lower() == 'exit':
-        #     print("Goodbye")
-        #     break
-        print(f"You: {audio}")
-        output = askgemini(audio)
-        print(f"Jargis: {output}")
-        play(tts_func(output))
-    except sr.UnknownValueError:
-        print("Could not understand audio")
-    except sr.RequestError as e:
-        print(f"Could not request results from Google Earth API; {0}".format(e))
-    except Exception as e:
-        print(f"Unexpected error: {e}")
 
-#
-# async def get_text_input():
-#     return await asyncio.to_thread(input, "You (or speak): ")
-#
-#
-# async def main():
-#     print("Jargis is online.")
-#     await speak("Jargis is online, Sir. Awaiting your command.")
-#
-
-#         # Create tasks for both voice and text input
-#         voice_task = asyncio.create_task(listen_for_command())
-#         text_task = asyncio.create_task(get_text_input())
-#
-#         # Wait for the first of the two tasks to complete
-#         done, pending = await asyncio.wait(
-#             [voice_task, text_task],
-#             return_when=asyncio.FIRST_COMPLETED
-#         )
-#
-#         # Cancel the task that is still running
-#         for task in pending:
-#             task.cancel()
-#
-#         # Get the result from the task that completed
-#         completed_task = done.pop()
-#         uInput = completed_task.result()
-#
-#         # Process the command if it's not empty
-#         if uInput.lower() == 'exit':
-#             print("Goodbye")
-#             break
-#
-#         if uInput:
-#             output = await askgemini(uInput)
-#             print(f"Jargis: {output}")
-#             await speak(output)
-#
-#
-# if __name__ == "__main__":
-#     asyncio.run(main())
-#
-
+if __name__ == "__main__":
+    main()

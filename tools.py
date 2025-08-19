@@ -106,7 +106,12 @@ def run_program(query):
 
 def open_tabs(url: str, browser: str = 'firefox regular'):
     try:
-        webbrowser.get(browser).open_new_tab(url)
+        for name, v in BROWSER_PATHS.items():
+            if name == browser:
+                webbrowser.get(name).open_new_tab(url)
+                return 'tab opened successfully'
+        webbrowser.get('firefox regular').open_new_tab(url)
+        return 'defaulted to google because whatever you put in did not work'
     except webbrowser.Error as e:
         return f"error could not find or open the requested browser: {browser}, with error message: {e}"
     except Exception as e:
@@ -225,6 +230,5 @@ def _play_music_spotify(title: str, form: str, artist: str, active_device_id: st
         search = _spotify_client.search(f"{title}", type='playlist')['playlists']['items'][0]['uri']
         _spotify_client.start_playback(active_device_id, search)
     return None
-
 
 
