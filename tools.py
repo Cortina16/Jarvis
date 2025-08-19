@@ -5,6 +5,7 @@ from spotipy.oauth2 import SpotifyOAuth
 import spotipy
 import subprocess
 import webbrowser
+import keyboard
 import ddgs
 import python_weather
 import asyncio
@@ -23,6 +24,16 @@ BROWSER_PATHS = {
 }
 for name, path in BROWSER_PATHS.items():
     webbrowser.register(name, None, webbrowser.BackgroundBrowser(path))
+
+def key_control(action: str, text: str = None):
+    if action == 'write' and text:
+        keyboard.write(text, delay=0.1)
+        return f'successfully typed {text}'
+    elif action == 'press_and_release' and text:
+        keyboard.press_and_release(text)
+        return f'successfully pressed {text}'
+    else:
+        return f"unsupported action {action}"
 
 
 

@@ -179,7 +179,28 @@ open_tab = types.Tool(
     ]
 )
 
-
+key_control = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="key_control",
+            description="take control of keyboard to write something",
+            parameters_json_schema={
+                'type' : 'object',
+                'properties' : {
+                    'action': {
+                        'type' : 'string',
+                        'description' : 'the action to perform. Actions are either: write, which is to write more than one character. shuch as a request to tyupe something out or other. The other action is: press_and_release, which is a single key to be pressed.',
+                    },
+                    'text': {
+                        'type': 'string',
+                        'description': "what should be either pressed or what should be written out on the keyboard",
+                    }
+                },
+                'required' : ['action', 'text'],
+            }
+        )
+    ]
+)
 
 
 functionMap = {
@@ -191,8 +212,9 @@ functionMap = {
     "search_files": tools.search_files,
     "run_program": tools.run_program,
     "open_tab" : tools.open_tabs,
+    "key_control": tools.key_control,
 }
-tools_list = [get_time, web_search, get_weather, main_controller_spotify, start_timer, search_files, run_program, open_tab]
+tools_list = [get_time, web_search, get_weather, main_controller_spotify, start_timer, search_files, run_program, open_tab, key_control]
 print(list(functionMap.keys()))
 def askgemini(question):
     """
