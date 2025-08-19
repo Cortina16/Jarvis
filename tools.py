@@ -1,15 +1,29 @@
 from datetime import datetime
 from time import sleep
-
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 import spotipy
+import subprocess
+import webbrowser
 import ddgs
 import python_weather
 import asyncio
 import os
 
 load_dotenv()
+
+
+
+
+#------INITIALIZATION-------#
+BROWSER_PATHS = {
+    "firefox incognito" : "C:\\Program Files\\Mozilla Firefox\\private_browsing.exe",
+    "firefox regular" : "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
+    "chrome" : "C:\\Program Files\\Google\Chrome\\Application\\chrome.exe"
+}
+for name, path in BROWSER_PATHS.items():
+    webbrowser.register(name, None, webbrowser.BackgroundBrowser(path))
+
 
 
 def getTime():
@@ -51,15 +65,52 @@ def get_weather(location):
     return asyncio.run(weather_grabber(location))
 
 def start_timer(duration):
-    # This is a synchronous wrapper for the async sleep
+    """
+    do not use this it fucking sucks but it's not cool enough to get fixed
+    :param duration: its a timer take a guess
+    :return: ur timer is done go do whatever u need to now.
+    """
     print(f"Jarvis is starting a timer for {duration} seconds...")
-    asyncio.run(asyncio.sleep(duration-15)) # We must use asyncio.run to execute the coroutine
+    asyncio.run(asyncio.sleep(duration-15))
     print("Timer has 15 seconds left")
     asyncio.run(asyncio.sleep(15))
     return f"Timer for {duration} seconds has finished, Sir."
 
 
+def search_files(query, result_amount: int = 5, otherFunction: bool = False):
+    command = ["es.exe", "-s", "-n", str(result_amount), query]
+    try:
+        result = subprocess.run(command, capture_output=True, text=True, check=True).stdout.strip().split("\n")
+        if otherFunction:
+            return result
+        return "\n".join(f"- {path}" for path in result)
+    except Exception as e:
+        print(f'error in search_files: {query}, error: {e}')
+        return f'error in search_files: {query}, error: {e}'
 
+
+def run_program(query):
+    if query.endswith(".exe"):
+        result = search_files(query, otherFunction=True)
+    else:
+        result = search_files(f"{query}.exe", otherFunction=True)
+    try:
+        for path in result:
+            if path.find('.exe') != -1:
+                subprocess.run([path])
+                return 'process ran successfully'
+        return 'process could not be ran, or possibly not found.'
+    except Exception as e:
+        print(f'error in program: {query}, error: {e}')
+        return 'program could not be ran'
+
+def open_tabs(url: str, browser: str = 'firefox regular'):
+    try:
+        webbrowser.get(browser).open_new_tab(url)
+    except webbrowser.Error as e:
+        return f"error could not find or open the requested browser: {browser}, with error message: {e}"
+    except Exception as e:
+        return f"error {e}"
 
 
 #--------SPOTIFY CONTROL-----#
