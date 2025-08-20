@@ -1,0 +1,166 @@
+{
+  "functions": [
+    {
+      "name": "get_time",
+      "description": "Returns the current date and time to help with greetings and scheduling",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "main_controller_spotify",
+      "description": "control spotify playback functions. if no device found, use device issuing commands. :param action: what is going to be performed. :param title: name of the spotify playback title. Should not be filled out if simply unpausing  :param form: what playback medium is being listened to    :return: an action.",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "what is going to be performed. Available options are as follows: play, used to unpause music, or to request to play other music. get_track_info, in which one gets information about the current track. pause, which pauses current music. skip_to_next_track, which skips the current track. and finally skip_to_previous_track, which skips but backwards to play the last song."
+          },
+          "title": {
+            "type": "string",
+            "description": "what the name of the requested track should be when searching. Only used in the event that action is 'play', and new music is requested"
+          },
+          "form": {
+            "type": "string",
+            "description": "what type of music should be played. should only be filled out in the event that the action 'play' is used. available options for this are: album, for albums. track, for tracks. and playlist, for playlists."
+          },
+          "amount": {
+            "type": "number",
+            "description": "amount of songs to skip in the event that action is song. only fill this out of skipping songs."
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "get_weather",
+      "description": "Returns the current weather condition",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "location": {
+            "type": "string",
+            "description": "The location of the desired weather information"
+          }
+        },
+        "required": [
+          "location"
+        ]
+      }
+    },
+    {
+      "name": "web_search",
+      "description": "Search the internet for a provided query and return the result",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The query to search for"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "start_timer",
+      "description": "Start the timer for the desired time",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "duration": {
+            "type": "number",
+            "description": "how long to start the timer for"
+          }
+        },
+        "required": [
+          "duration"
+        ]
+      }
+    },
+    {
+      "name": "search_files",
+      "description": "Search the current computer for any requested files that may exist",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The files/folder to search the computer for"
+          },
+          "result_amount": {
+            "type": "number",
+            "description": "how many files to show up in the returned results"
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "run_program",
+      "description": "Search the current computer for any program that may exist and is desired to run",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "the program to attempt to run."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "open_tab",
+      "description": "open a tab to the desired url in a web browser",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "the web url to open a tab to."
+          },
+          "web_browser": {
+            "type": "string",
+            "description": "the web browser to use to open the tab. default option is: firefox regular, which is firefox non private browsing. the second option is: firefox incognito, which is firefox private browsing. the third option is chrome, which is normal google chrome. "
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "key_control",
+      "description": "take control of keyboard to write something",
+      "parameters_json_schema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "the action to perform. Actions are either: write, which is to write more than one character. shuch as a request to tyupe something out or other. The other action is: press_and_release, which is a single key to be pressed."
+          },
+          "text": {
+            "type": "string",
+            "description": "what should be either pressed or what should be written out on the keyboard"
+          }
+        },
+        "required": [
+          "action",
+          "text"
+        ]
+      }
+    }
+  ]
+}

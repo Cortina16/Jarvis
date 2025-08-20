@@ -1,3 +1,4 @@
+import json
 from elevenlabs import play
 from google import genai
 from dotenv import load_dotenv
@@ -11,197 +12,21 @@ load_dotenv()
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 conversationHistory = []
 
-get_time = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="get_time",
-            description="Returns the current date and time to help with greetings and scheduling",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {},
-            'required' : [],
-            }
-        ),
-    ]
-)
+# load tools for Jarvis, grabs a json table from tools.json and adds it to funciton declerations
+with open('tools.json', 'r') as f:
+    tools_dec_data = json.load(f)['functions']
 
-main_controller_spotify = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="main_controller_spotify",
-            description="control spotify playback functions. if no device found, use device issuing commands. :param action: what is going to be performed. :param title: name of the spotify playback title. Should not be filled out if simply unpausing  :param form: what playback medium is being listened to    :return: an action.",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'action' : {
-                        'type' : 'string',
-                        'description' : "what is going to be performed. Available options are as follows: play, used to unpause music, or to request to play other music. get_track_info, in which one gets information about the current track. pause, which pauses current music. skip_to_next_track, which skips the current track. and finally skip_to_previous_track, which skips but backwards to play the last song.",
-                    },
-                    'title' : {
-                        'type' : 'string',
-                        'description' : "what the name of the requested track should be when searching. Only used in the event that action is 'play', and new music is requested"
-                    },
-                    'form' : {
-                        'type' : 'string',
-                        'description' : "what type of music should be played. should only be filled out in the event that the action 'play' is used. available options for this are: album, for albums. track, for tracks. and playlist, for playlists."
-
-                    },
-                    'amount' : {
-                        'type' : 'number',
-                        'description' : "amount of songs to skip in the event that action is song. only fill this out of skipping songs."
-                    }
-                },
-                'required' : ['action'],
-            }
-        ),
-    ]
-)
-
-web_search = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="web_search",
-            description="Search the internet for a provided query and return the result",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'query': {
-                        'type' : 'string',
-                        'description' : 'The query to search for',
-                    }
-                },
-                'required' : ['query'],
-            }
-        )
-    ]
-)
-
-get_weather = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="get_weather",
-            description="Returns the current weather condition",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'location': {
-                        'type' : 'string',
-                        'description' : 'The location of the desired weather information',
-                    }
-                },
-                'required' : ['location'],
-            }
-        )
-    ]
-)
-
-start_timer = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="start_timer",
-            description="Start the timer for the desired time",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'duration' : {
-                        'type' : 'number',
-                        'description' : "how long to start the timer for",
-                    }
-                },
-                'required' : ['duration'],
-            }
-        )
-    ]
-)
-
-search_files = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="search_files",
-            description="Search the current computer for any requested files that may exist",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'query': {
-                        'type' : 'string',
-                        'description' : 'The files/folder to search the computer for',
-                    },
-                    'result_amount': {
-                        'type': 'number',
-                        'description': "how many files to show up in the returned results",
-                    }
-                },
-                'required' : ['query'],
-            }
-        )
-    ]
-)
-
-run_program = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="run_program",
-            description="Search the current computer for any program that may exist and is desired to run",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'query': {
-                        'type' : 'string',
-                        'description' : 'the program to attempt to run.',
-                    },
-                },
-                'required' : ['query'],
-            }
-        )
-    ]
-)
-
-open_tab = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="open_tab",
-            description="open a tab to the desired url in a web browser",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'url': {
-                        'type' : 'string',
-                        'description' : 'the web url to open a tab to.',
-                    },
-                    'web_browser': {
-                        'type' : 'string',
-                        'description' : 'the web browser to use to open the tab. default option is: firefox regular, which is firefox non private browsing. the second option is: firefox incognito, which is firefox private browsing. the third option is chrome, which is normal google chrome. ',
-                    },
-                },
-                'required' : ['url'],
-            }
-        )
-    ]
-)
-
-key_control = types.Tool(
-    function_declarations=[
-        types.FunctionDeclaration(
-            name="key_control",
-            description="take control of keyboard to write something",
-            parameters_json_schema={
-                'type' : 'object',
-                'properties' : {
-                    'action': {
-                        'type' : 'string',
-                        'description' : 'the action to perform. Actions are either: write, which is to write more than one character. shuch as a request to tyupe something out or other. The other action is: press_and_release, which is a single key to be pressed.',
-                    },
-                    'text': {
-                        'type': 'string',
-                        'description': "what should be either pressed or what should be written out on the keyboard",
-                    }
-                },
-                'required' : ['action', 'text'],
-            }
-        )
-    ]
-)
-
+tools_list = [
+    types.Tool(
+        function_declarations=[
+            types.FunctionDeclaration(
+                name=d['name'],
+                description=d['description'],
+                parameters_json_schema=d['parameters_json_schema'],
+            )
+        ]
+    ) for d in tools_dec_data
+]
 
 functionMap = {
     "get_time": tools.getTime,
@@ -214,8 +39,10 @@ functionMap = {
     "open_tab" : tools.open_tabs,
     "key_control": tools.key_control,
 }
-tools_list = [get_time, web_search, get_weather, main_controller_spotify, start_timer, search_files, run_program, open_tab, key_control]
-print(list(functionMap.keys()))
+#-- end tool initializiation
+
+
+# Jarvis' brain. the gmemini api logic + garbage because it liked to kill itself. it barley works but who cares
 def askgemini(question):
     """
     Sends a question to the Gemini api and stores history
@@ -298,7 +125,7 @@ def askgemini(question):
 #----------TTS SYSTEM---------#
 def tts_func(text: str):
     elevenlabs = ElevenLabs(
-      api_key=os.getenv("ELEVEN_LABS_KEY_2"),
+      api_key=os.getenv("ELEVEN_LABS_KEY_3"),
     )
     audio = elevenlabs.text_to_speech.convert(
         text=text,
@@ -308,9 +135,17 @@ def tts_func(text: str):
     )
     return audio
 
+INITIALIZED = False
+
+
+#actual process of everything.
 def main():
+    global INITIALIZED
     while True:
         try:
+            if not INITIALIZED:
+                print("Jarvis is ready to go!")
+                INITIALIZED = True
             r = sr.Recognizer()
             with sr.Microphone() as source:
                 audio = r.recognize_google(r.listen(source))

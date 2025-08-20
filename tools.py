@@ -18,6 +18,10 @@ load_dotenv()
 
 #------INITIALIZATION-------#
 BROWSER_PATHS = {
+    #if you want jarvis to be able to use other browsers,\
+    # add a line with what you want the browser to be titled on the left
+    #then add it's directory to the right
+    #then find the prompt for brwosers and add the instruction that {browser title} is how jarvis hsould refer to whatever browser you added.
     "firefox incognito" : "C:\\Program Files\\Mozilla Firefox\\private_browsing.exe",
     "firefox regular" : "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
     "chrome" : "C:\\Program Files\\Google\Chrome\\Application\\chrome.exe"
@@ -25,6 +29,8 @@ BROWSER_PATHS = {
 for name, path in BROWSER_PATHS.items():
     webbrowser.register(name, None, webbrowser.BackgroundBrowser(path))
 
+
+#allows jarvis' to steal users keyboard and start typing
 def key_control(action: str, text: str = None):
     if action == 'write' and text:
         keyboard.write(text, delay=0.1)
@@ -36,7 +42,7 @@ def key_control(action: str, text: str = None):
         return f"unsupported action {action}"
 
 
-
+#gets time on user's computer
 def getTime():
     """
     returns the current time and date
@@ -44,6 +50,7 @@ def getTime():
     return datetime.now().strftime("%I:%M %p on %A, %B %d, %Y")
 
 
+#searches google for whatever
 def web_search(query: str):
     """
     performs a web search and returns the result
@@ -60,6 +67,7 @@ def web_search(query: str):
     return f'No results found for {query}'
 
 
+#grabs weather
 async def weather_grabber(location):
     """
     returns the current weather and date
@@ -72,14 +80,17 @@ async def weather_grabber(location):
     return f"The temperature is {weather.temperature} and is {weather.kind} with a description of {weather.description} and a windspeed of {weather.wind_speed} mph and coordinates of {weather.coordinates}"
 
 
+#self explanatory
 def get_weather(location):
     return asyncio.run(weather_grabber(location))
 
+
+#a shitty timer that doesn't work
 def start_timer(duration):
     """
-    do not use this it fucking sucks but it's not cool enough to get fixed
+    do not use this it  sucks but it's not cool enough to get fixed
     :param duration: its a timer take a guess
-    :return: ur timer is done go do whatever u need to now.
+    :return: returns something that should work but doesn't.
     """
     print(f"Jarvis is starting a timer for {duration} seconds...")
     asyncio.run(asyncio.sleep(duration-15))
@@ -88,6 +99,7 @@ def start_timer(duration):
     return f"Timer for {duration} seconds has finished, Sir."
 
 
+#allows jarvis to rummage through user's pc
 def search_files(query, result_amount: int = 5, otherFunction: bool = False):
     command = ["es.exe", "-s", "-n", str(result_amount), query]
     try:
@@ -99,7 +111,7 @@ def search_files(query, result_amount: int = 5, otherFunction: bool = False):
         print(f'error in search_files: {query}, error: {e}')
         return f'error in search_files: {query}, error: {e}'
 
-
+#allows jarvis to run executables on user's pc
 def run_program(query):
     if query.endswith(".exe"):
         result = search_files(query, otherFunction=True)
@@ -115,6 +127,7 @@ def run_program(query):
         print(f'error in program: {query}, error: {e}')
         return 'program could not be ran'
 
+#allows Jarvis to open browser tabs
 def open_tabs(url: str, browser: str = 'firefox regular'):
     try:
         for name, v in BROWSER_PATHS.items():
@@ -132,6 +145,7 @@ def open_tabs(url: str, browser: str = 'firefox regular'):
 #--------SPOTIFY CONTROL-----#
 
 
+#spotify auth system
 def _authenticate_spotify():
     """
     Authenticate with Spotify and return a Spotify client.
@@ -154,6 +168,7 @@ def _authenticate_spotify():
 _spotify_client = _authenticate_spotify()
 
 
+#hlper function for the main controller that gets the information for used deviecs
 def _active_devices_id_spotify(_spotify_client):
     devices = _spotify_client.devices()
     active_device = None
@@ -167,6 +182,7 @@ def _active_devices_id_spotify(_spotify_client):
     return active_device
 
 
+#main function that jarvis interacts with
 def main_controller_spotify(action: str, title: str = None, form: str = 'track', artist: str = None, amount: int = 1):
     """
     control spotify playback functions. if no device found, use device issuing commands.
@@ -202,7 +218,7 @@ def main_controller_spotify(action: str, title: str = None, form: str = 'track',
             return f"Unknown spotify action attempted {action}"
     except spotipy.SpotifyException as e:
         return f"Spotipy Error: {str(e)}"
-
+#fuinction for spotify control that gets song information
 def _get_track_info():
     global _spotify_client
     try:
@@ -216,7 +232,8 @@ def _get_track_info():
     except spotipy.SpotifyException as e:
         return f"Error getting current track: {str(e)}"
 
-
+#function for spotify control that plays music
+#TODO: allow jarvis to actually get the name of the song/album/whatever that it played
 def _play_music_spotify(title: str, form: str, artist: str, active_device_id: str):
     """
     play a song from spotify
