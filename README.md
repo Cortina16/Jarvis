@@ -10,5 +10,5 @@ How to use the project?
    7) ELEVEN_LABS_KEY_2=""
 
    8) Inside each of the gemini flag, and eleven labs flag, insert the api key for those respective applications. Inside the spotipy key and spotify key, insert the bot information you create.
-
+Please install everything's command line version in order to make use of some functions of the program.
 this guide will be better when i dont get lazy
