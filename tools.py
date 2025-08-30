@@ -86,7 +86,6 @@ def get_weather(location):
 
 
 #a shitty timer that doesn't work
-#TODO: make this shitter code work
 def start_timer(duration):
     """
     do not use this it  sucks but it's not cool enough to get fixed
