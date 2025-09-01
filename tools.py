@@ -11,6 +11,9 @@ import python_weather
 import asyncio
 import os
 
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+
+
 load_dotenv()
 
 
@@ -259,4 +262,167 @@ def _play_music_spotify(title: str, form: str, artist: str, active_device_id: st
         _spotify_client.start_playback(active_device_id, search)
     return None
 
+#Home assistant
+async def switch(entity_id: str):
+    """
+    Toggles a switch on and off
+    :return:
+    """
+    async with websockets.connect('ws://homeassistant.local:8123/api/websocket') as websocket:
+        await websocket.send(json.dumps({'type': 'auth', 'access_token': ACCESS_TOKEN}))
+        await websocket.send(json.dumps(
+            {
+                "id": 1,
+                "type": "call_service",
+                "domain": "switch",
+                "service": 'toggle',
+                "service_data": {
+                    "entity_id": entity_id,
+                }
+            }))
+
+
+async def garage():
+    async with websockets.connect('ws://homeassistant.local:8123/api/websocket') as websocket:
+        await websocket.send(json.dumps({'type': 'auth', 'access_token': ACCESS_TOKEN}))
+        await websocket.send(json.dumps(
+            {
+                "id": 1,
+                "type": "call_service",
+                "domain": "cover",
+                "service": 'toggle',
+                "service_data": {
+                    "entity_id": 'cover.garage_garage_door',
+                }
+            }))
+
+
+async def get_all_entities():
+    async with websockets.connect('ws://homeassistant.local:8123/api/websocket') as websocket:
+        await websocket.recv()
+        await websocket.send(json.dumps({'type': 'auth', 'access_token': ACCESS_TOKEN}))
+        await websocket.recv()
+        await websocket.send(json.dumps({'id': 19, 'type': 'get_states'}))
+        response = json.loads(await websocket.recv())
+        if response['success']:
+            for entity in response['result']:
+                entity_id_list[entity['entity_id']] = entity['entity_id']
+                try:
+                    print(entity['attributes']['friendly_name'])
+                    print(entity['entity_id'])
+                    entity_id_list[entity['attributes']['friendly_name']] = entity['entity_id']
+                except Exception as e:
+                    print(e)
+    
+    print(entity_id_list)
+
+
+async def climate_control(service, entity_id, mode, high_temp: int = None, low_temp: int = None):
+    """
+
+    :param mode:
+    :param entity_id: id of the hvac
+    :param service: what the hvac will do, available options are 'set_preset_mode', 'set_temperature', 'set_fan_mode', 'set_hvac_mode', 'toggle'
+    :param high_temp: Defines an uppper temperature
+    :param low_temp: Defines a lower bound temperature
+    :return:
+    """
+    try:
+        async with websockets.connect('ws://homeassistant.local:8123/api/websocket') as websocket:
+            await websocket.send(json.dumps({'type': 'auth', 'access_token': ACCESS_TOKEN}))
+            await websocket.recv()
+            match service:
+                case 'set_preset_mode':
+                    await websocket.send(json.dumps(
+                        {
+                            "id": 1,
+                            "type": "call_service",
+                            "domain": "climate",
+                            "service": service,
+                            "service_data": {
+                                "entity_id": entity_id,
+                                "preset_mode": mode,
+                            }
+                        }))
+                case 'set_temperature':
+                    await websocket.send(json.dumps(
+                        {
+                            "id": 1,
+                            "type": "call_service",
+                            "domain": "climate",
+                            "service": service,
+                            "service_data": {
+                                "entity_id": entity_id,
+                                "high_temp": high_temp,
+                                "low_temp": low_temp,
+                            }
+                        }))
+                
+                case 'set_fan_mode':
+                    await websocket.send(json.dumps(
+                        {
+                            "id": 1,
+                            "type": "call_service",
+                            "domain": "climate",
+                            "service": service,
+                            "service_data": {
+                                "entity_id": entity_id,
+                                "fan_mode": mode,
+                            }
+                        }))
+                case 'set_hvac_mode':
+                    # TODO: fill out
+                    await websocket.send(json.dumps(
+                        {
+                            "id": 1,
+                            "type": "call_service",
+                            "domain": "climate",
+                            "service": service,
+                            "service_data": {
+                                "entity_id": entity_id,
+                                "hvac_mode": mode,
+                            }
+                        }))
+                
+                case 'toggle':
+                    # TODO: fill out
+                    await websocket.send(json.dumps(
+                        {
+                            "id": 1,
+                            "type": "call_service",
+                            "domain": "climate",
+                            "service": service,
+                            "service_data": {
+                                "entity_id": entity_id,
+                            }
+                        }))
+    
+    except Exception as e:
+        print(e)
+
+
+async def light_controls(entity_id, service, brightness: int = 100):
+    """
+    toggle things in the light domain
+    :param entity_id: id of the light to be toggled
+    :param service: should the light be 'turn_on' or 'turn_off' or 'toggle'. Most likely to be 'toggle'
+    :param brightness: brightness of the light (0-255)
+    :return:
+    """
+    try:
+        async with websockets.connect('ws://homeassistant.local:8123/api/websocket') as websocket:
+            await websocket.send(json.dumps({'type': 'auth', 'access_token': ACCESS_TOKEN}))
+            await websocket.send(json.dumps(
+                {
+                    "id": 1,
+                    "type": "call_service",
+                    "domain": "light",
+                    "service": service,
+                    "service_data": {
+                        "entity_id": entity_id,
+                        "brightness": brightness,
+                    }
+                }))
+    except Exception as e:
+        print(f'error: {e}')
 

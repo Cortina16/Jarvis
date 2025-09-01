@@ -4,6 +4,7 @@ from google import genai
 from dotenv import load_dotenv
 from google.genai import types
 from elevenlabs.client import ElevenLabs
+
 import speech_recognition as sr
 import tools
 import os
@@ -125,7 +126,7 @@ def askgemini(question):
 #----------TTS SYSTEM---------#
 def tts_func(text: str):
     elevenlabs = ElevenLabs(
-      api_key=os.getenv("ELEVEN_LABS_KEY_3"),
+      api_key=os.getenv("ELEVEN_LABS_KEY_4"),
     )
     audio = elevenlabs.text_to_speech.convert(
         text=text,
@@ -133,6 +134,7 @@ def tts_func(text: str):
         model_id="eleven_multilingual_v2",
         output_format="mp3_44100_128"
     )
+
     return audio
 
 INITIALIZED = False
