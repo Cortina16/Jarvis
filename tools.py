@@ -11,15 +11,11 @@ import python_weather
 import asyncio
 import os
 
-ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
-
-
 load_dotenv()
 
-
-
-
 #------INITIALIZATION-------#
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+
 BROWSER_PATHS = {
     #if you want jarvis to be able to use other browsers,\
     # add a line with what you want the browser to be titled on the left
