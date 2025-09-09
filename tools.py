@@ -1,5 +1,8 @@
+import json
 from datetime import datetime
 from time import sleep
+
+import websockets
 from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyOAuth
 import spotipy
@@ -10,8 +13,6 @@ import ddgs
 import python_weather
 import asyncio
 import os
-
-ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
 
 
 load_dotenv()
@@ -29,11 +30,16 @@ BROWSER_PATHS = {
     "firefox regular" : "C:\\Program Files\\Mozilla Firefox\\firefox.exe",
     "chrome" : "C:\\Program Files\\Google\Chrome\\Application\\chrome.exe"
 }
+
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+entity_id_list = {}
+
+
 for name, path in BROWSER_PATHS.items():
     webbrowser.register(name, None, webbrowser.BackgroundBrowser(path))
 
 
-#allows jarvis' to steal users keyboard and start typing
+#allows jarvis to steal users keyboard and start typing
 def key_control(action: str, text: str = None):
     if action == 'write' and text:
         keyboard.write(text, delay=0.1)
@@ -44,9 +50,22 @@ def key_control(action: str, text: str = None):
     else:
         return f"unsupported action {action}"
 
+#timer (may work not sure don't care to test it)
+async def timer(time):
+    """
+    creates an async timer
+    :param time: integer in seconds to time
+    :return: end timer
+    """
+    print(f"created timer for {time} seconds")
+    await asyncio.sleep(time)
+    return f"finished timer for {time} seconds"
+    
+
+
 
 #gets time on user's computer
-def getTime():
+def get_time():
     """
     returns the current time and date
     """
