@@ -30,7 +30,7 @@ tools_list = [
 ]
 
 functionMap = {
-    "get_time": tools.getTime,
+    "get_time": tools.get_time,
     "web_search": tools.web_search,
     "get_weather": tools.get_weather,
     "main_controller_spotify": tools.main_controller_spotify,
